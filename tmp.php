@@ -19,7 +19,7 @@ class tmp extends \PMVC\PlugIn
             return;
         }
         $fl = \PMVC\plug('file_list');
-        foreach($tempFiles as $item){
+        foreach($tempFiles as $item=>$prefix){
             if (is_file($item)) {
                 unlink($item);
             } elseif (is_dir($item)) {
@@ -39,17 +39,27 @@ class tmp extends \PMVC\PlugIn
     public function file($prefix=null)
     {
         $file = tempnam($this['parent'], $prefix);
-        $this->temp[$file] = $prefix;
+        if (is_file($file)) {
+            $this->temp[$file] = $prefix;
+        }
         return $file;
     }
 
     public function dir($prefix=null)
     {
-        $tmp = $this->create_file($prefix);
+        $tmp = $this->file($prefix);
         $tmp_dir = $tmp.$this->tmpdir_append_str;
-        mkdir($tmp_dir,-1,true);
-        $this->temp[$tmp_dir] = $prefix;
-        return $tmp_dir;
+        if (is_dir($tmp_dir)) {
+            $is_success = mkdir($tmp_dir,-1,true);
+            if ($is_success) {
+                $this->temp[$tmp_dir] = $prefix;
+                return $tmp_dir;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
 }
