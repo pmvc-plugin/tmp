@@ -36,18 +36,20 @@ class tmp extends \PMVC\PlugIn
         $this->temp =& \PMVC\getOption('TemporaryFiles');
     }
 
-    public function create_file($prefix=null)
+    public function file($prefix=null)
     {
-        $file = tempnam($this['parent'], 'zip_');
-        $this->temp[$file] = $file;
+        $file = tempnam($this['parent'], $prefix);
+        $this->temp[$file] = $prefix;
+        return $file;
     }
 
-    public function create_folder($prefix=null)
+    public function dir($prefix=null)
     {
         $tmp = $this->create_file($prefix);
         $tmp_dir = $tmp.$this->tmpdir_append_str;
         mkdir($tmp_dir,-1,true);
-        $this->temp[$tmp_dir] = $tmp_dir;
+        $this->temp[$tmp_dir] = $prefix;
+        return $tmp_dir;
     }
 
 }
