@@ -49,7 +49,7 @@ class tmp extends \PMVC\PlugIn
     {
         $tmp = $this->file($prefix);
         $tmp_dir = $tmp.$this->tmpdir_append_str;
-        if (is_dir($tmp_dir)) {
+        if (!is_dir($tmp_dir)) {
             $is_success = mkdir($tmp_dir,-1,true);
             if ($is_success) {
                 $this->temp[$tmp_dir] = $prefix;
