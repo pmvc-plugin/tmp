@@ -1,20 +1,34 @@
 <?php
+
 namespace PMVC\PlugIn\tmp;
 
-// \PMVC\l(__DIR__.'/xxx.php');
+use PMVC\HashMap;
+use PMVC\PlugIn;
 
 ${_INIT_CONFIG}[_CLASS] = __NAMESPACE__.'\tmp';
 
-register_shutdown_function(array(${_INIT_CONFIG}[_CLASS],'clean_temps'));
+const ALL_TEMP_FILES = '__AllTemporaryFiles__';
+\PMVC\option(
+    'set',
+    ALL_TEMP_FILES,
+    new HashMap() 
+);
 
-class tmp extends \PMVC\PlugIn
+register_shutdown_function([
+    ${_INIT_CONFIG}[_CLASS],
+    'cleanTemps'
+]);
+
+class tmp extends PlugIn
 {
-    private $temp = array();
-    private $tmpdir_append_str = '_dir/';
+    private $temp = [];
+    const TMP_DIR_APPEND_STR = '_dir/';
 
-    public static function clean_temps()
+    public static function cleanTemps()
     {
-        $tempFiles =& \PMVC\getOption('TemporaryFiles');
+        $tempFiles = \PMVC\getOption(
+            ALL_TEMP_FILES
+        );
         if (empty($tempFiles)) {
             return;
         }
@@ -30,10 +44,12 @@ class tmp extends \PMVC\PlugIn
 
     public function init()
     {
-        if (!empty($this['parent'])) {
+        if (empty($this['parent'])) {
             $this['parent'] = sys_get_temp_dir();
         }
-        $this->temp =& \PMVC\getOption('TemporaryFiles');
+        $this->temp = \PMVC\getOption(
+            ALL_TEMP_FILES
+        );
     }
 
     public function file($prefix=null)
@@ -48,7 +64,7 @@ class tmp extends \PMVC\PlugIn
     public function dir($prefix=null)
     {
         $tmp = $this->file($prefix);
-        $tmp_dir = $tmp.$this->tmpdir_append_str;
+        $tmp_dir = $tmp.self::TMP_DIR_APPEND_STR;
         if (!is_dir($tmp_dir)) {
             $is_success = mkdir($tmp_dir,-1,true);
             if ($is_success) {
