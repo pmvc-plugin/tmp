@@ -44,8 +44,14 @@ class tmp extends PlugIn
 
     public function init()
     {
+        $systemp = \PMVC\realpath(sys_get_temp_dir());
         if (empty($this['parent'])) {
-            $this['parent'] = sys_get_temp_dir();
+            $this['parent'] = $systemp;
+        } else {
+            $this['parent'] = \PMVC\realpath($this['parent']);
+        }
+        if ($this['parent'] === $systemp) {
+            $this['hideNotice'] = true;
         }
         $this->temp = \PMVC\getOption(
             ALL_TEMP_FILES
@@ -54,7 +60,11 @@ class tmp extends PlugIn
 
     public function file($prefix=null)
     {
-        $file = tempnam($this['parent'], $prefix);
+        if ($this['hideNotice']) {
+            $file = @tempnam($this['parent'], $prefix);
+        } else {
+            $file = tempnam($this['parent'], $prefix);
+        }
         if (is_file($file)) {
             $this->temp[$file] = $prefix;
         }
